@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel, Content } from '@google/generative-ai';
 import { TestDocument } from '../types';
 
 // 서버 측 API 키 사용 (클라이언트에 노출되지 않음)
@@ -11,7 +11,15 @@ let model: GenerativeModel;
 try {
   if (API_KEY) {
     genAI = new GoogleGenerativeAI(API_KEY);
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 8192,
+        topP: 0.8,
+        topK: 40,
+      },
+    });
   }
 } catch (error) {
   console.error('Gemini API 초기화 오류:', error);
@@ -123,7 +131,7 @@ export async function generateTestCases(documentText: string): Promise<TestDocum
   }
 
   try {
-    const prompt = `
+    const promptText = `
 당신은 기획서를 테스트케이스로 변환하는 전문가입니다. 다음 기획서 내용을 철저히 분석하여 모든 테스트케이스를 JSON 형식으로 생성해주세요.
 
 기획서 내용:
@@ -186,16 +194,18 @@ ${documentText}
     // API 호출 전 로깅 추가
     console.log('Gemini API 호출 시작...');
     
-    // 최신 API 사용법으로 업데이트
-    const result = await model.generateContent({
-      contents: [{ text: prompt }],
-      generationConfig: {
-        temperature: 0.2,
-        maxOutputTokens: 8192,
-      }
-    });
+    // 최신 API 사용법에 맞게 Content 객체 생성
+    const content: Content = {
+      parts: [
+        { text: promptText }
+      ],
+      role: 'user'
+    };
     
-    // 응답 텍스트 추출 방식 업데이트
+    // 최신 버전의 API 호출 방식으로 수정
+    const result = await model.generateContent(content);
+    
+    // 응답 텍스트 추출
     const responseText = result.response.text();
     
     // 디버깅을 위한 로깅 추가
