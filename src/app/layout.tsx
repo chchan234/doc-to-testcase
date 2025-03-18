@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: '기획서 테스트케이스 변환기',
-  description: '기획서 문서(PDF, DOCX, DOC)를 테스트케이스 Excel 파일로 변환하는 웹 애플리케이션',
+  description: '기획서 문서를 업로드하여 테스트케이스를 자동으로 생성합니다.',
 };
 
 export default function RootLayout({
@@ -14,7 +14,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        {children}
+        {/* Suspense 오류 방지를 위해 suppressHydrationWarning 추가 */}
+        <div suppressHydrationWarning>
+          {children}
+        </div>
       </body>
     </html>
   );
