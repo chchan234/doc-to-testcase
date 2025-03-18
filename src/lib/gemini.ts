@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, GenerativeModel, Content } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import { TestDocument } from '../types';
 
 // 서버 측 API 키 사용 (클라이언트에 노출되지 않음)
@@ -194,16 +194,10 @@ ${documentText}
     // API 호출 전 로깅 추가
     console.log('Gemini API 호출 시작...');
     
-    // 최신 API 사용법에 맞게 Content 객체 생성
-    const content: Content = {
-      parts: [
-        { text: promptText }
-      ],
-      role: 'user'
-    };
-    
-    // 최신 버전의 API 호출 방식으로 수정
-    const result = await model.generateContent(content);
+    // 올바른 방식으로 API 호출 (parts 배열을 직접 전달)
+    const result = await model.generateContent([
+      { text: promptText }
+    ]);
     
     // 응답 텍스트 추출
     const responseText = result.response.text();
