@@ -11,7 +11,7 @@ let model: any;
 try {
   if (API_KEY) {
     genAI = new GoogleGenerativeAI(API_KEY);
-    model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
   }
 } catch (error) {
   console.error('Gemini API 초기화 오류:', error);
