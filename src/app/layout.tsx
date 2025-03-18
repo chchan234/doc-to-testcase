@@ -1,9 +1,20 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
-  title: '기획서 테스트케이스 변환기',
-  description: '기획서 문서를 업로드하여 테스트케이스를 자동으로 생성합니다.',
+  title: "기획서 테스트케이스 변환기",
+  description: "기획서를 테스트케이스 Excel 파일로 변환해주는 도구",
 };
 
 export default function RootLayout({
@@ -13,11 +24,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body>
-        {/* Suspense 오류 방지를 위해 suppressHydrationWarning 추가 */}
-        <div suppressHydrationWarning>
-          {children}
-        </div>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning={true}
+      >
+        {children}
       </body>
     </html>
   );

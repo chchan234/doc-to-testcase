@@ -1,55 +1,53 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 interface DownloadButtonProps {
   excelBlob: Blob | null;
   fileName: string;
 }
 
 export default function DownloadButton({ excelBlob, fileName }: DownloadButtonProps) {
-  // Blob이 없으면 버튼을 표시하지 않음
-  if (!excelBlob) {
-    return null;
-  }
+  const [isMounted, setIsMounted] = useState(false);
 
-  // 다운로드 핸들러
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!excelBlob || !isMounted) return null;
+  
   const handleDownload = () => {
-    // 다운로드 링크 생성
+    if (typeof window === 'undefined' || !excelBlob) return;
+    
     const url = URL.createObjectURL(excelBlob);
-    
-    // 가상의 링크 요소 생성 및 클릭
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    
-    // 메모리 정리
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
     URL.revokeObjectURL(url);
+    document.body.removeChild(a);
   };
-
+  
   return (
-    <div className="flex flex-col items-center mt-6">
-      <div className="mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-green-500" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
-          <path d="M14 2v6h6" />
-          <path d="M12 18v-6M9 15l3 3 3-3" />
-        </svg>
+    <div className="w-full max-w-xl mx-auto mt-6">
+      <div className="bg-green-50 rounded-lg p-4 flex justify-between items-center">
+        <div className="flex items-center">
+          <svg className="h-6 w-6 text-green-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-sm font-medium text-green-800">테스트케이스 생성 완료!</p>
+        </div>
+        <button
+          onClick={handleDownload}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        >
+          <svg className="h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Excel 다운로드
+        </button>
       </div>
-      
-      <p className="text-sm text-gray-600 mb-3">
-        테스트케이스 Excel 파일이 생성되었습니다!
-      </p>
-      
-      <button
-        onClick={handleDownload}
-        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-      >
-        테스트케이스 다운로드
-      </button>
-      
-      <p className="text-xs text-gray-500 mt-2">
-        {fileName}
-      </p>
     </div>
   );
 }

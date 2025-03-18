@@ -7,51 +7,36 @@ interface ProcessingStatusProps {
 }
 
 export default function ProcessingStatus({ isProcessing, status, error }: ProcessingStatusProps) {
-  // 에러가 있으면 에러 메시지 표시
-  if (error) {
-    return (
-      <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-        <div className="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-          <h3 className="text-sm font-medium text-red-800">오류가 발생했습니다</h3>
-        </div>
-        <p className="mt-2 text-sm text-red-700">{error}</p>
-      </div>
-    );
-  }
-
-  // 처리 중이면 상태 메시지와 로딩 표시
-  if (isProcessing) {
-    return (
-      <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-center">
-          <div className="relative">
-            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+  if (!isProcessing && !error) return null;
+  
+  return (
+    <div className="w-full max-w-xl mx-auto mt-6">
+      {isProcessing ? (
+        <div className="bg-blue-50 rounded-lg p-4 flex items-center">
+          <div className="mr-3">
+            <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
           </div>
-          <h3 className="text-sm font-medium text-blue-800">처리 중...</h3>
+          <div>
+            <p className="text-sm font-medium text-blue-800">{status}</p>
+          </div>
         </div>
-        <p className="mt-2 text-sm text-blue-700">{status}</p>
-      </div>
-    );
-  }
-
-  // 처리 중이 아니고 상태 메시지가 있으면 상태 메시지 표시
-  if (status) {
-    return (
-      <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-        <div className="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          <h3 className="text-sm font-medium text-green-800">완료</h3>
+      ) : error ? (
+        <div className="bg-red-50 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-red-800">{error}</p>
+            </div>
+          </div>
         </div>
-        <p className="mt-2 text-sm text-green-700">{status}</p>
-      </div>
-    );
-  }
-
-  // 아무것도 표시하지 않음
-  return null;
+      ) : null}
+    </div>
+  );
 }
