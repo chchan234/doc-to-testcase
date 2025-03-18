@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import FileUpload from '@/components/FileUpload';
 import ProcessingStatus from '@/components/ProcessingStatus';
 import DownloadButton from '@/components/DownloadButton';
@@ -13,25 +13,35 @@ export default function Home() {
   const [excelBlob, setExcelBlob] = useState<Blob | null>(null);
   const [fileName, setFileName] = useState('testcases.xlsx');
   const [retryCount, setRetryCount] = useState(0);
-  const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [shouldRetry, setShouldRetry] = useState(false);
+  
+  // useRef를 사용하여 최신 상태를 참조할 수 있게 함
+  const currentFileRef = useRef<File | null>(null);
+  const retryCountRef = useRef(0);
 
   // 재시도 로직을 useEffect로 분리
   useEffect(() => {
-    if (shouldRetry && currentFile) {
+    // 파일과 재시도 플래그가 있을 때만 실행
+    if (shouldRetry && currentFileRef.current) {
       const timer = setTimeout(() => {
-        processFile(currentFile);
+        if (currentFileRef.current) {
+          processFile(currentFileRef.current);
+        }
         setShouldRetry(false);
       }, 1000);
       
       return () => clearTimeout(timer);
     }
-  }, [shouldRetry, currentFile]);
+  }, [shouldRetry]); // processFile은 의존성 배열에서 제거
 
-  // 파일 처리 로직을 별도의 함수로 분리
-  const processFile = async (file: File) => {
+  // 파일 처리 로직
+  const processFile = useCallback(async (file: File) => {
     if (!file) return;
     
+    // 현재 파일을 ref에 저장
+    currentFileRef.current = file;
+    
+    // 상태 초기화
     setIsProcessing(true);
     setStatus('파일 업로드 중...');
     setError(undefined);
@@ -150,15 +160,25 @@ export default function Home() {
           throw new Error('생성된 Excel 파일이 너무 작습니다. 다시 시도해주세요.');
         }
         
+        // 상태 업데이트
         setExcelBlob(blob);
         setStatus(`테스트케이스 ${itemCount}개가 포함된 Excel 파일이 생성되었습니다!`);
+        // 재시도 카운트 초기화
+        setRetryCount(0);
+        retryCountRef.current = 0;
       } catch (fetchError) {
         console.error('API 호출 오류:', fetchError);
         
+        // 현재 재시도 횟수를 ref에서 가져옴
+        const currentRetryCount = retryCountRef.current;
+        
         // 재시도 로직
-        if (retryCount < 2) {
+        if (currentRetryCount < 2) {
           setStatus('오류가 발생했습니다. 자동으로 다시 시도합니다...');
-          setRetryCount(prevCount => prevCount + 1);
+          // 재시도 카운트 업데이트
+          const newRetryCount = currentRetryCount + 1;
+          setRetryCount(newRetryCount);
+          retryCountRef.current = newRetryCount;
           
           // 재시도 플래그 설정
           setShouldRetry(true);
@@ -172,19 +192,16 @@ export default function Home() {
       setError(err instanceof Error ? err.message : '처리 중 오류가 발생했습니다.');
       setStatus('오류가 발생했습니다');
     } finally {
-      setIsProcessing(false);
-      // 재시도 카운트 초기화
-      if (excelBlob) {
-        setRetryCount(0);
+      if (!shouldRetry) {
+        setIsProcessing(false);
       }
     }
-  };
+  }, []);
 
   // 파일 선택 핸들러
   const handleFileSelected = useCallback((file: File) => {
-    setCurrentFile(file);
     processFile(file);
-  }, []);
+  }, [processFile]);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-8 sm:p-24">
