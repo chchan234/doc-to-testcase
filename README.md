@@ -1,4 +1,4 @@
-# TestCase Forge
+# TestCase_Generator
 
 기획서 문서(PDF, DOCX, DOC)를 테스트케이스 Excel 파일로 자동 변환하는 웹 애플리케이션입니다.
 
