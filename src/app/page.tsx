@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import FileUpload from '@/components/FileUpload';
 import ProcessingStatus from '@/components/ProcessingStatus';
 import DownloadButton from '@/components/DownloadButton';
@@ -13,8 +13,25 @@ export default function Home() {
   const [excelBlob, setExcelBlob] = useState<Blob | null>(null);
   const [fileName, setFileName] = useState('testcases.xlsx');
   const [retryCount, setRetryCount] = useState(0);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [shouldRetry, setShouldRetry] = useState(false);
 
-  const handleFileSelected = async (file: File) => {
+  // 재시도 로직을 useEffect로 분리
+  useEffect(() => {
+    if (shouldRetry && currentFile) {
+      const timer = setTimeout(() => {
+        processFile(currentFile);
+        setShouldRetry(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [shouldRetry, currentFile]);
+
+  // 파일 처리 로직을 별도의 함수로 분리
+  const processFile = async (file: File) => {
+    if (!file) return;
+    
     setIsProcessing(true);
     setStatus('파일 업로드 중...');
     setError(undefined);
@@ -143,10 +160,8 @@ export default function Home() {
           setStatus('오류가 발생했습니다. 자동으로 다시 시도합니다...');
           setRetryCount(prevCount => prevCount + 1);
           
-          // 1초 후 재시도
-          setTimeout(() => {
-            handleFileSelected(file);
-          }, 1000);
+          // 재시도 플래그 설정
+          setShouldRetry(true);
           return;
         }
         
@@ -164,6 +179,12 @@ export default function Home() {
       }
     }
   };
+
+  // 파일 선택 핸들러
+  const handleFileSelected = useCallback((file: File) => {
+    setCurrentFile(file);
+    processFile(file);
+  }, []);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-8 sm:p-24">
