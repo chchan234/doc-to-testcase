@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import FileUpload from '@/components/FileUpload';
 import ProcessingStatus from '@/components/ProcessingStatus';
 import DownloadButton from '@/components/DownloadButton';
@@ -13,15 +13,8 @@ export default function Home() {
   const [excelBlob, setExcelBlob] = useState<Blob | null>(null);
   const [fileName, setFileName] = useState('testcases.xlsx');
   const [retryCount, setRetryCount] = useState(0);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const handleFileSelected = async (file: File) => {
-    if (!isMounted) return;
-    
     setIsProcessing(true);
     setStatus('파일 업로드 중...');
     setError(undefined);
@@ -171,10 +164,6 @@ export default function Home() {
       }
     }
   };
-
-  if (!isMounted) {
-    return <div className="flex min-h-screen flex-col items-center justify-center p-8 sm:p-24">로딩 중...</div>;
-  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-8 sm:p-24">
