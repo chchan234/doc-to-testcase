@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import { TestDocument } from '../types';
 
 // 서버 측 API 키 사용 (클라이언트에 노출되지 않음)
@@ -6,7 +6,7 @@ const API_KEY = process.env.GEMINI_API_KEY || '';
 
 // Gemini 모델 초기화
 let genAI: GoogleGenerativeAI;
-let model: any;
+let model: GenerativeModel;
 
 try {
   if (API_KEY) {
@@ -186,9 +186,17 @@ ${documentText}
     // API 호출 전 로깅 추가
     console.log('Gemini API 호출 시작...');
     
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const responseText = response.text();
+    // 최신 API 사용법으로 업데이트
+    const result = await model.generateContent({
+      contents: [{ text: prompt }],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 8192,
+      }
+    });
+    
+    // 응답 텍스트 추출 방식 업데이트
+    const responseText = result.response.text();
     
     // 디버깅을 위한 로깅 추가
     console.log('Gemini API 응답 텍스트 (일부):', responseText.substring(0, 200) + '...');
